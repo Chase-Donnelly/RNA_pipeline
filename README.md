@@ -33,6 +33,8 @@ The STAR manual can be found by using the following link: https://physiology.med
 
 When working on a server all the previous steps can be combined into one larger code file to be used by your local cluster.  This means you can reduce the number of jobs that you are queing and henceforth be able to stay higher in prioty in the que. The code can be seen in the RNA_seq_core file and the file can be better understood in the comment version.  Use the commented version to help follow along with the code but modify the core file to actually run your data on the cluster as the commented version may contain errors. 
 
-# DESeq2 on to the fun stuff
+# DESeq2 on to the fun stuff Differential gene expression
+
+
 
 
