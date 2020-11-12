@@ -1,3 +1,5 @@
+Pipeline built by Bart Cuyper and modified by Chase Donnelly for work at the Univeristy of Antwerpen.
+
 # RNA_pipeline
 This is an overview of an RNAseq pipeline useing STAR and DESeq2 with my descriptions, starting with data coming from the sequencer.  There are verious other programs that can be used for RNAseq anaylsis, but this is the authors preference at the time of writting. Feel free to explore other pipelines based on the current concencuss and what fits your needs, not everyone may have access to a cluster.  
 
@@ -27,6 +29,10 @@ The next step is alignment, and example code for this can be found in the alignm
 
 The STAR manual can be found by using the following link: https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf
 
-# Putting it all together
+# Putting it all together so far
 
-When working on a server all the previous steps can be combined into one larger code file to be used by your local cluster.  This means you can reduce the number of jobs that you are queing and henceforth be able to stay higher in prioty in the que. 
+When working on a server all the previous steps can be combined into one larger code file to be used by your local cluster.  This means you can reduce the number of jobs that you are queing and henceforth be able to stay higher in prioty in the que. The code can be seen in the RNA_seq_core file and the file can be better understood in the comment version.  Use the commented version to help follow along with the code but modify the core file to actually run your data on the cluster as the commented version may contain errors. 
+
+# DESeq2 on to the fun stuff
+
+
