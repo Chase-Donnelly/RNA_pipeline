@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#PBS -l nodes=1:ppn=20
+#PBS -l walltime=23:00:00
+module load Java
+genomedir="/scratch/antwerpen/202/vsc20223/hg39/"
+workingdir="/scratch/antwerpen/202/vsc20223/Auchi"
+cores=20
+genome_fasta="GCF_000001405.39_GRCh38.p13_genomic.fna"
+genome_gtf="GCF_000001405.39_GRCh38.p13_genomic.gtf"
+adapters="/scratch/antwerpen/grp/abiodatamining/Tools/Trimmomatic-0.39/adapters/adapter.fa"
+PATH=$PATH:/scratch/antwerpen/grp/abiodatamining/Tools/STAR-2.7.2b/bin/Linux_x86_64/
+PATH=$PATH:/scratch/antwerpen/grp/abiodatamining/Tools/samtools-1.3.1
+PATH=$PATH:/scratch/antwerpen/grp/abiodatamining/Tools/fastQC-0.11.4
+cd /scratch/antwerpen/202/vsc20223/Auchi/Batch5/
+fastqfiles_R1=$(ls ./*/*R1*fastq* | grep -v trimmed | grep -v unpaired | grep -v fastqc)
+#written in loop, in case the same analysis has to be performed on multiple files
+for i in $fastqfiles_R1
+do
+filebasename=$(basename $i | cut -d _ -f2)
+DIR=$(dirname $i)
+java -jar /scratch/antwerpen/grp/abiodatamining/Tools/trimmomatic-035/trimmomatic-035.jar PE \
+$i \
+${i/'_R1'/'_R2'} \
+${i/'_R1'/'_trimmed_R1'} \
+${i/'_R1'/'_unpaired_R1'} \
+${i/'_R1'/'_trimmed_R2'} \
+${i/'_R1'/'_unpaired_R2'} \
+LEADING:20 TRAILING:20 ILLUMINACLIP:$adapters:2:40:15 SLIDINGWINDOW:4:20 MINLEN:36
+fastqc ${i/'_R1'/'_trimmed_R1'}
+fastqc ${i/'_R1'/'_trimmed_R2'}
+STAR \
+--readFilesCommand zcat \
+--readFilesIn ${i/'_R1'/'_trimmed_R1'} ${i/'_R1'/'_trimmed_R2'} \
+--runThreadN $cores \
+--genomeDir $workingdir/Genome \
+--sjdbGTFfile $genomedir$genome_gtf \
+--quantMode GeneCounts \
+--outFileNamePrefix $DIR/$filebasename \
+--outSAMtype BAM SortedByCoordinate
+done
