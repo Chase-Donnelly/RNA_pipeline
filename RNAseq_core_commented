@@ -1,0 +1,40 @@
+#!/usr/bin/env bash   #These first three files are to tell the HPC Server information on what to run and for how long 
+#PBS -l nodes=1:ppn=20
+#PBS -l walltime=23:00:00
+module load Java  # Load java into the environment
+genomedir="/scratch/antwerpen/202/vsc20223/hg39/" # set variables for the genome directory and the working directory.  This way we only need to change the code here and not further down in the document multiple times.
+workingdir="/scratch/antwerpen/202/vsc20223/Auchi"
+cores=20 # set the number of cores to run 
+genome_fasta="GCF_000001405.39_GRCh38.p13_genomic.fna" # just like above we need to set the location of our fasta and gtf files
+genome_gtf="GCF_000001405.39_GRCh38.p13_genomic.gtf"
+adapters="/scratch/antwerpen/grp/abiodatamining/Tools/Trimmomatic-0.39/adapters/adapter.fa" #sets the location for the adopter files, these are located in our groups server folder
+PATH=$PATH:/scratch/antwerpen/grp/abiodatamining/Tools/STAR-2.7.2b/bin/Linux_x86_64/ #The next three lines are adding STAR, samtools, and fastQC to the servers PATH so we can run them by just typing the code
+PATH=$PATH:/scratch/antwerpen/grp/abiodatamining/Tools/samtools-1.3.1
+PATH=$PATH:/scratch/antwerpen/grp/abiodatamining/Tools/fastQC-0.11.4
+cd /scratch/antwerpen/202/vsc20223/Auchi/Batch5/ # set the working directory for this batch, with large data sets it is best to run in batches 
+fastqfiles_R1=$(ls ./*/*R1*fastq* | grep -v trimmed | grep -v unpaired | grep -v fastqc) # here was are looking through the current directory and matching files
+#written in loop, in case the same analysis has to be performed on multiple files, this is done in a way that loops through the working directory
+for i in $fastqfiles_R1 # for each item that we matched previously, we are starting a loop here to run trough all the R1 and R2 files in the batch 
+do
+filebasename=$(basename $i | cut -d _ -f2)
+DIR=$(dirname $i)
+java -jar /scratch/antwerpen/grp/abiodatamining/Tools/trimmomatic-035/trimmomatic-035.jar PE \ #here we load Java to run trimomatic, we are starting the QC here and outputing the files renamed to mark if they were trimmed 
+$i \
+${i/'_R1'/'_R2'} \
+${i/'_R1'/'_trimmed_R1'} \
+${i/'_R1'/'_unpaired_R1'} \
+${i/'_R1'/'_trimmed_R2'} \
+${i/'_R1'/'_unpaired_R2'} \
+LEADING:20 TRAILING:20 ILLUMINACLIP:$adapters:2:40:15 SLIDINGWINDOW:4:20 MINLEN:36 # this is telling trimomatic what to do
+fastqc ${i/'_R1'/'_trimmed_R1'} #now we run fastqc on the R1 and R2 files 
+fastqc ${i/'_R1'/'_trimmed_R2'}
+STAR \ # start to run STAR 
+--readFilesCommand zcat \ #tells star we are using gziped files 
+--readFilesIn ${i/'_R1'/'_trimmed_R1'} ${i/'_R1'/'_trimmed_R2'} \ # name and path of the input files R1 and R2
+--runThreadN $cores \ # tells us to run the cores we specified earlier 
+--genomeDir $workingdir/Genome \ # set the genome directory 
+--sjdbGTFfile $genomedir$genome_gtf \ # tell star our gtf file 
+--quantMode GeneCounts \ #specifies the type of quantification we want to use, genecounts means we want count reads per gene 
+--outFileNamePrefix $DIR/$filebasename \ #changes the default outputfile name prefrix 
+--outSAMtype BAM SortedByCoordinate #tell star the output file type we want 
+done #this closes our loop 
