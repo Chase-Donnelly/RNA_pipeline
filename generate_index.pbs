@@ -1,0 +1,6 @@
+# This file code can be used in the terminal to create an index file for use with STAR, the comments can be removed but are here to explain what each part of the code means.
+
+STAR --runMode genomeGenerate \ #Here you can see we are telling STAR that we want to run, in this cases generating an index file
+--genomeDir /path/to/STAR_mm10/ \ #This is the path to your reference genome directory
+--genomeFastaFiles ~/mm10_index/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.fa \ #Here again is the path the the fata file to be used, replace with the path to your fasta file.
+--runThreadN 16 # This is telling STAR that we want to use 16 cores to run this code. 
