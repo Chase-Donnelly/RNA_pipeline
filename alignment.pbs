@@ -1,0 +1,7 @@
+# This is an example for a basic STAR alignment job
+
+
+STAR --genomeDir /path/to/STAR_mm10/ \ # this is telling the path the the genome directory file where your reference genome and index files should be located
+--readFilesIn read_1.fq read_2.fq \ # This tells the path to your two fastq files R1 and R2 that have been previously trimmed for quality control 
+--runThreadN 16 \ # Telling STAR to use 16 cores of the processor, make sure to use the correct amount for your machine/server
+--outSAMtype BAM SortedByCoordinate # this tells STAR the output file type that you would like, in this case a BAM file 
